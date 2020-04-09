@@ -29,7 +29,7 @@ This script takes an existing Trivy report and gzipped CVSS file as input, and o
 
 ```bash
 $ trivy -q --cache-dir /tmp/trivy -f json debian:stable-slim > trivy_report.json
-$ python add-cvss.py trivy_report.json cvss.json.gz > new_report.json
+$ python add-cvss.py cvss.json.gz trivy_report.json > new_report.json
 $ cat new_report.json | jq '.[0].Vulnerabilities[0]'
 {
   "VulnerabilityID": "CVE-2011-3374",

@@ -9,7 +9,7 @@
 #
 #
 # Usage: python add-cvss.py <trivy-json-report> <cvss-json-file>
-# Example: python add-cvss.py output.json cvss.json.gz > new_report.json
+# Example: python add-cvss.py cvss.json.gz output.json > new_report.json
 
 import gzip
 import json
@@ -17,10 +17,10 @@ import logging
 import sys
 from json.decoder import JSONDecodeError
 
-# Get the filename of the trivy report from the first argument
-report_filename = sys.argv[1]
 # Get the filename of the CVSS JSON
-cvss_filename = sys.argv[2]
+cvss_filename = sys.argv[1]
+# Get the filename of the trivy report from the first argument
+report_filename = sys.argv[2]
 
 
 def parse_file_or_quit(filename, gzipped=False):
@@ -49,15 +49,16 @@ report_json = parse_file_or_quit(report_filename)
 cvss_json = parse_file_or_quit(cvss_filename, gzipped=True)
 
 # Iterate over items in the trivy report
-for item in report_json[0]["Vulnerabilities"]:
-    try:
-        # Get the CVE name to index the CVSS file
-        cve_name = item['VulnerabilityID']
-        # Add the CVSS info if available
-        item["CVSS"] = cvss_json[cve_name]
-    except KeyError:
-        # If not available set blank and move on
-        item["CVSS"] = {}
-        continue
+if report_json[0]["Vulnerabilities"] != None:
+    for item in report_json[0]["Vulnerabilities"]:
+        try:
+            # Get the CVE name to index the CVSS file
+            cve_name = item['VulnerabilityID']
+            # Add the CVSS info if available
+            item["CVSS"] = cvss_json[cve_name]
+        except KeyError:
+            # If not available set blank and move on
+            item["CVSS"] = {}
+            continue
 # Dump the JSON to stdout
-print(json.dumps(report_json, indent=2))
+print(json.dumps(report_json, indent=2, ensure_ascii=False))
